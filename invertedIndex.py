@@ -13,7 +13,7 @@ def inverted_index():
     for docID, filePath in enumerate(glob.glob(folderPath)):
         words=preprocessing(filePath)
         
-        document_map[docID]=filePath
+        document_map[docID+1]=filePath
 
         for word in words:
             inverted_index.setdefault(word, []) # set default list for words that is not present in dictionary
@@ -22,13 +22,67 @@ def inverted_index():
 
     inverted_index={a:list(set(b)) for a, b in inverted_index.items()} # remove duplicate values in posting list
 
-    return inverted_index
+    return inverted_index, document_map
 
+def query_process(query):
+    words=query.split()
+    connecting_words=list()
+    different_words=list()
+    for word in words:
+        if word in ['and', 'or', 'not']:
+            connecting_words.append(word)
+        else:
+            different_words.append(word)
 
-indexes=inverted_index()
+    index, doc_map=inverted_index()
+    index_keys=index.keys()
 
-for key, value in indexes.items():
-    print(' ________________________')
-    print(f'|Term: {key}')
-    print(f'|Posting: {value}')
-    print('|________________________')
+    zeros_and_ones=list()
+    all_zeros_and_ones=list()
+
+    for word in different_words:
+        if word in index_keys:
+            zeros_and_ones=[0]*len(doc_map)
+            all_zeros_and_ones.append(zeros_and_ones)
+        else:
+            print(f"{word} not found!")
+            return 0
+
+    doc_ids=doc_map.keys()
+    for id, word in enumerate(different_words):
+        posting=index.get(word)
+        for key in doc_ids:
+            if key in posting:
+                all_zeros_and_ones[id][key-1]=1
+
+    for word in connecting_words:
+        word1=all_zeros_and_ones[0]
+        word2=all_zeros_and_ones[1]
+        if word == 'and':
+            new_zeros_and_ones=[w1 and w2 for (w1,w2) in zip(word1, word2)]
+            all_zeros_and_ones.remove(word1)
+            all_zeros_and_ones.remove(word2)
+            all_zeros_and_ones.append(new_zeros_and_ones)
+        elif word == 'or':
+            new_zeros_and_ones=[w1 or w2 for (w1,w2) in zip(word1, word2)]
+            all_zeros_and_ones.remove(word1)
+            all_zeros_and_ones.remove(word2)
+            all_zeros_and_ones.append(new_zeros_and_ones)
+        elif word == 'not':
+            not_word2=[not w2 for w2 in word2]
+            new_zeros_and_ones=[w1 and w2 for (w1,w2) in zip(word1,not_word2)]
+            all_zeros_and_ones.remove(word1)
+            all_zeros_and_ones.remove(word2)
+            all_zeros_and_ones.append(new_zeros_and_ones)
+
+    answer=list()
+    result=all_zeros_and_ones[0]
+    for i, bit in enumerate(result):
+        if bit == 1:
+            answer.append(doc_map.get(i+1))
+
+    return answer
+
+query=input('Enter your query: ')
+result=query_process(query)
+print(result)
