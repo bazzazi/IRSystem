@@ -1,9 +1,24 @@
-import glob
+import glob,re
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+Stopwords = set(stopwords.words('english'))
+
+
+def remove_special_characters(text):
+    regex = re.compile('[^a-zA-Z0-9\s]')
+    text_returned = re.sub(regex,'',text)
+    return text_returned
 
 def preprocessing(filePath):
     file=open(filePath)
     text=file.read()
-    return text.split()
+    text = remove_special_characters(text)
+    text = re.sub(re.compile('\d'),'',text)
+    words = word_tokenize(text)
+    words = [word for word in words if len(words)>1]
+    words = [word.lower() for word in words]
+    words = [word for word in words if word not in Stopwords]
+    return words
 
 def inverted_index():
     folderPath='data/*'
@@ -29,10 +44,10 @@ def query_process(query):
     connecting_words=list()
     different_words=list()
     for word in words:
-        if word in ['and', 'or', 'not']:
-            connecting_words.append(word)
+        if word.lower() in ['and', 'or', 'not']:
+            connecting_words.append(word.lower())
         else:
-            different_words.append(word)
+            different_words.append(word.lower())
 
     index, doc_map=inverted_index()
     index_keys=index.keys()
