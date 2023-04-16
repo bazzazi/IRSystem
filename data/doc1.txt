@@ -1,0 +1,3 @@
+9%&5 The inverted index is a database index storing a mapping from content, such as words or numbers, to its locations in a database, or in a document or a set of documents. The purpose of an inverted index is to allow a fast full-text search.
+
+To build the inverted index, we have to split those sentences into tokens, in our case, the tokens are words. After this, tokens will be saved with links to documents, in some cases, before saving tokens can be transformed.

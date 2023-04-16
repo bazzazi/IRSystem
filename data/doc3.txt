@@ -1,0 +1,3 @@
+As above I only used Porter Stemmer module from NLTK library while other pre-processing and tokenization are manually done. Flask here is used to deploy our model on the server.
+
+In the above function each speech file is explicitly read, cleaned, tokenized and stemmed. For making inverted index dictionary each word is taken as key and the value of the key is the document id. There are many duplicates in our dictionary values as one word can occur multiple times in same document. Inverted Index can only be used for Boolean queries and conjunctive Boolean queries. Hence for phrase queries and proximity queries we use positional index.
