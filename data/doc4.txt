@@ -1,3 +1,5 @@
 In this method, we collect all the unique words and form a matrix of Unique Words & Documents. Mark 1 in the cell in which a word exists in that corresponding document.
 
-Positional Indexing is almost similar to Unigram Inverted indexing, in positional indexing we additionally keep the position of all occurrences of token related to the documentID’s
+Positional Indexing is almost similar to unigram Inverted indexing, in positional indexing we additionally keep the position of all occurrences of token related to the documentID’s
+
+obtaining information system

@@ -10,21 +10,54 @@ class QueryProcessing:
         self.temp=""
         self.skip=0
 
-    def compute(self):
+    def queryParsing(self):
+
         index=positionaIndex()
+        connecting_word=list()
+        diff_word=list()
+        not_answer=[]
+
         if re.findall('/\d',self.query)==[]:
             self.query=re.sub(' ', ' /1 ', self.query)
         self.query=self.query.split()
-        word1 = index.get(self.query[0])
-        word2 = index.get(self.query[2])
+        for word in self.query:
+            if re.findall('/\d', word):
+                connecting_word.append(word)
+            else:
+                diff_word.append(word)
+        results=self.compute(connecting_word[0], diff_word[:2])
+        for i, skip in enumerate(connecting_word[1:]):
+                word=diff_word[i+2]
+                for result in results:
+                    doc_id=list(result.keys())[0]
+                    word_pos=index.get(word).get(doc_id)
+                    if word_pos is None:
+                        not_answer.append(result)
+                        continue
+                    new_index=(int(list(result.values())[0][-1])+int(skip.replace('/','')))
+                    if new_index not in word_pos:
+                        not_answer.append(result)
+                    else:
+                        new_result=list(result.values())[0]
+                        new_result.append(new_index)
+                        result[doc_id]=new_result
+
+        return [result for result in results if result not in not_answer]
+    
+    def compute(self,skip ,query):
+        index=positionaIndex()
+
+        word1 = index.get(query[0])
+        word2 = index.get(query[1])
+
         anding = set(word1).intersection(word2)
-        self.query[1] = re.sub("/", "", self.query[1])
+        skip = re.sub("/", "", skip)
         answer = []
-        skip = int(self.query[1])
+        skip = int(skip)
 
         for i in anding:
-            pp1 = index.get(self.query[0])[i]
-            pp2 = index.get(self.query[2])[i]
+            pp1 = index.get(query[0])[i]
+            pp2 = index.get(query[1])[i]
 
             plen1 = len(pp1)
             plen2 = len(pp2)
@@ -45,7 +78,6 @@ class QueryProcessing:
         else:
             print('No Docs matched !')
             return 0
-
 
 def remove_special_characters(text):
     regex = re.compile('[^a-zA-Z0-9\s]')
@@ -83,6 +115,5 @@ def positionaIndex():
 
 
 
-query=QueryProcessing('explicitly read')
-for match in query.compute():
-    print(match)
+query=QueryProcessing('model of information retrieval')
+print(query.queryParsing())
