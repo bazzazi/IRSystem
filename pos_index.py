@@ -16,18 +16,24 @@ class QueryProcessing:
         diff_word=list()
         not_answer=[]
 
-        if re.findall('/\d',self.query)==[]:
-            self.query=re.sub(' ', ' /1 ', self.query)
         self.query=self.query.split()
+        j=0
         for word in self.query:
             if re.findall('/\d', word):
                 connecting_word.append(word)
+                j+=1
             else:
+                
+                if j%2==1:
+                    connecting_word.append('/1')
+                    diff_word.append(word)
+                    continue
                 if index.get(word):
                     diff_word.append(word)
                 else:
                     print(f"'{word}' was not found!")
                     return
+                j+=1
                 
         results=self.compute(connecting_word[0], diff_word[:2])
         for i, skip in enumerate(connecting_word[1:]):
@@ -120,5 +126,5 @@ def positionaIndex():
 
 
 
-query=QueryProcessing('model of retrieval')
+query=QueryProcessing('positional indexing /1 we additionally')
 print(query.queryParsing())
