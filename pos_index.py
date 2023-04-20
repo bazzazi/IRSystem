@@ -11,7 +11,6 @@ class QueryProcessing:
         self.skip=0
 
     def queryParsing(self):
-
         index=positionaIndex()
         connecting_word=list()
         diff_word=list()
@@ -24,7 +23,12 @@ class QueryProcessing:
             if re.findall('/\d', word):
                 connecting_word.append(word)
             else:
-                diff_word.append(word)
+                if index.get(word):
+                    diff_word.append(word)
+                else:
+                    print(f"'{word}' was not found!")
+                    return
+                
         results=self.compute(connecting_word[0], diff_word[:2])
         for i, skip in enumerate(connecting_word[1:]):
                 word=diff_word[i+2]
@@ -42,7 +46,12 @@ class QueryProcessing:
                         new_result.append(new_index)
                         result[doc_id]=new_result
 
-        return [result for result in results if result not in not_answer]
+        answer=[result for result in results if result not in not_answer]
+        if answer:
+            return answer
+        else:
+            print("No Docs matched with the query!")
+            return
     
     def compute(self,skip ,query):
         index=positionaIndex()
@@ -65,7 +74,6 @@ class QueryProcessing:
             ii = jj = 0
 
             while ii != plen1:
-                jj=0
                 while jj != plen2:
                     if abs(pp1[ii]-pp2[jj])==skip:
                         answer.append({i:[pp1[ii],pp2[jj]]})
@@ -73,11 +81,8 @@ class QueryProcessing:
                         break 
                     jj+=1
                 ii+=1
-        if answer:
-            return answer
-        else:
-            print('No Docs matched !')
-            return 0
+
+        return answer
 
 def remove_special_characters(text):
     regex = re.compile('[^a-zA-Z0-9\s]')
@@ -115,5 +120,5 @@ def positionaIndex():
 
 
 
-query=QueryProcessing('model of information retrieval')
+query=QueryProcessing('model of retrieval')
 print(query.queryParsing())
