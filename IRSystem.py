@@ -1,3 +1,5 @@
+# Developer: Mohammad Ali Bazzazi
+############# starting code #############
 import glob,re
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
@@ -199,3 +201,5 @@ def positionaIndex():
 query=input("Enter you query: ")
 queryProcess=QueryProcessing(query)
 print(queryProcess.queryParsing())
+
+############# ending code #############
