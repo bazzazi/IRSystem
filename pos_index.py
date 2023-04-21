@@ -196,6 +196,6 @@ def positionaIndex():
     return result, inverted_index, doc_map
 
 
-
-query=QueryProcessing('model not information')
-print(query.queryParsing())
+query=input("Enter you query: ")
+queryProcess=QueryProcessing(query)
+print(queryProcess.queryParsing())
