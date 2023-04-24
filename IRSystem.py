@@ -63,9 +63,9 @@ class QueryProcessing:
 
         doc_ids=doc_map.keys()
         for id, word in enumerate(diff_word):
-            posting=inverted_index.get(word)
+            posting=list(set(inverted_index.get(word)))
             for key in doc_ids:
-                if key in posting:
+                if key-1 in posting:
                     all_zeros_and_ones[id][key-1]=1
 
         for word in connecting_word:
@@ -87,13 +87,11 @@ class QueryProcessing:
                 all_zeros_and_ones.remove(word1)
                 all_zeros_and_ones.remove(word2)
                 all_zeros_and_ones.append(new_zeros_and_ones)
-
         answer=list()
         result=all_zeros_and_ones[0]
         for i, bit in enumerate(result):
             if bit == 1:
                 answer.append(doc_map.get(i+2))
-
         return answer
 
     def compute_pos_index(self, diff_word, connecting_word, pos_index ,doc_map):
@@ -109,7 +107,7 @@ class QueryProcessing:
                 word_pos=pos_index.get(word).get(doc_id)
                 if word_pos is None:
                     continue
-                new_index=(int(list(result.values())[0][-1])+int(skip.replace('/','')))
+                new_index=(int(list(result.values())[0][-1])+int(skip.replace('/','')))+1
                 if new_index in word_pos:
                     new_result=list(result.values())[0]
                     new_result.append(new_index)
