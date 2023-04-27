@@ -1,13 +1,15 @@
 # Developer: Mohammad Ali Bazzazi
 ############# starting code #############
-import glob,re
+import glob,re,os
+from difflib import SequenceMatcher
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 Stopwords = set(stopwords.words('english'))
 
 class QueryProcessing:
     def __init__(self, query) -> None:
-        self.query=query
+        self.temp_query=query.lower()
+        self.query=query.lower()
         self.stack=[]
         self.temp=""
         self.skip=0
@@ -18,7 +20,7 @@ class QueryProcessing:
         diff_word=list()
         pos_idx=0
         invert_idx=0
-        self.query=self.query.split()
+        self.query=self.queryPreProcessing(self.query)
         j=0
         for word in self.query:
             if re.findall('/\d', word):
@@ -36,15 +38,17 @@ class QueryProcessing:
                     connecting_word.append('/0')
                     pos_idx=1
                     invert_idx=0
-                    diff_word.append(word)
+                    if pos_index.get(word):
+                        diff_word.append(word)
+                    else:
+                        return self.notFound(word)
                     continue
                 if pos_index.get(word):
                     diff_word.append(word)
                 else:
-                    print(f"'{word}' was not found!")
-                    return
+                    return self.notFound(word)
+
                 j+=1
-            
         ##################################
         if invert_idx:
             return self.compute_inverted_index(diff_word, connecting_word, inverted_index, doc_map)
@@ -52,7 +56,19 @@ class QueryProcessing:
         ##################################
         elif pos_idx:   
             return self.compute_pos_index(diff_word,connecting_word ,pos_index, doc_map)
-
+        
+    def notFound(self,word):
+        print(f"'{word}' was not found!")
+        suggestion=self.spellCorrection(word)
+        red_suggestion=colors['red'].format(suggestion)
+        answer=input(colors['white'].format(f"Did you mean '{red_suggestion}' (Y/N): "))
+        if answer is "Y":
+            self.temp_query=self.temp_query.replace(word, suggestion)
+            queryProcess=QueryProcessing(self.temp_query)
+            return queryProcess.queryParsing()
+        else:
+            return f"'{word}' was not found!"
+    
     def compute_inverted_index(self, diff_word, connecting_word, inverted_index, doc_map):
         zeros_and_ones=list()
         all_zeros_and_ones=list()
@@ -91,15 +107,18 @@ class QueryProcessing:
         result=all_zeros_and_ones[0]
         for i, bit in enumerate(result):
             if bit == 1:
-                answer.append(doc_map.get(i+2))
-        return answer
+                answer.append(doc_map.get(i+1))
 
+        return answer
+    
     def compute_pos_index(self, diff_word, connecting_word, pos_index ,doc_map):
         final_result=dict()
         temp_result=self.compute(connecting_word[0], diff_word[:2])
+
         k=0
         answer=[]
         for i, skip in enumerate(connecting_word[1:]):
+
             k=1
             word=diff_word[i+2]
             for result in temp_result:
@@ -137,7 +156,6 @@ class QueryProcessing:
         skip = re.sub("/", "", skip)
         answer = []
         skip = int(skip)
-
         for i in anding:
             pp1 = index.get(query[0])[i]
             pp2 = index.get(query[1])[i]
@@ -157,6 +175,26 @@ class QueryProcessing:
                 ii+=1
 
         return answer
+
+    def spellCorrection(self, word):
+        indexWords=positionaIndex()[0].keys()
+        results=list()
+        for indexWord in indexWords:
+            sim=float(SequenceMatcher(None, indexWord, word).ratio())
+            results.append({indexWord:sim})
+        max=float(list(results[0].values())[0])
+        result=results[0]
+        for sim in results[1:]:
+            if list(sim.values())[0]>max:
+                max=float(list(sim.values())[0])
+                result=sim
+        return list(result.keys())[0]
+
+    def queryPreProcessing(self,query):
+        regex = re.compile('[^a-zA-Z0-9/\s]')
+        text_returned = re.sub(regex,'',query)
+        words = word_tokenize(text_returned)
+        return words
 
 def remove_special_characters(text):
     regex = re.compile('[^a-zA-Z0-9\s]')
@@ -195,9 +233,18 @@ def positionaIndex():
 
     return result, inverted_index, doc_map
 
+colors={
+    
+    'green':"\033[38;2;76;255;12m{}\033[0m",
+    'red':"\033[38;2;255;10;36m{}\033[0m",
+    'blue':"\033[38;2;51;73;255m{}\033[0m",
+    'white':"\033[38;2;255;255;255m{}\033[0m",
+}
 
-query=input("Enter you query: ")
-queryProcess=QueryProcessing(query)
-print(queryProcess.queryParsing())
+os.system('cls' if os.name == 'nt' else 'clear')
+while 1:
+    query=input(colors['green'].format("Enter your query:")+colors['blue'].format("~")+colors['white'].format("$ "))
+    queryProcess=QueryProcessing(query)
+    print(queryProcess.queryParsing())
 
 ############# ending code #############
