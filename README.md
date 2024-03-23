@@ -3,8 +3,8 @@ Hi everybody :wave:
 
 Hope you doing well :blush:
 
-This `python` project is a simple Information Retrieval system which accepts boolean queries and returns result.
-The documents are placed in data folder of Project.
+This `python` project is a simple ***Information Retrieval system*** which accepts boolean queries and returns result.
+The documents are placed in `data` folder of Project.
 
 
 ## Platforms :iphone::computer:
